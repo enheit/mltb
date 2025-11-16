@@ -78,7 +78,7 @@ This will:
 Once a theme is generated, a minimal UI appears with:
 
 ```
-  midnight-crystal [1/5]
+  [1/5] midnight-crystal
 
   [N] Next  [P] Prev  [S] Save  [Q] Quit
 ```
@@ -138,7 +138,7 @@ Names are generated from ~200 carefully curated words in each category, giving y
 
 **Quick workflow:**
 1. Run `:MLTBDarkSoft`
-2. See theme name: `twilight-amber [1/1]`
+2. See theme name: `[1/1] twilight-amber`
 3. Press `N` to try more variations
 4. Press `P` to go back to one you liked
 5. Press `S` to save it
