@@ -56,11 +56,10 @@ local function render_menu()
 
   -- Keybindings
   table.insert(lines, "Keybindings:")
-  table.insert(lines, "  [1] or [a] - Accept (save theme)")
-  table.insert(lines, "  [2] or [r] - Reject (close without saving)")
-  table.insert(lines, "  [3] or [n] - Next (generate new theme)")
-  table.insert(lines, "  [4] or [b] - Back (previous theme in history)")
-  table.insert(lines, "  [q] - Quit")
+  table.insert(lines, "  [N] - Next")
+  table.insert(lines, "  [P] - Prev")
+  table.insert(lines, "  [A] - Accept")
+  table.insert(lines, "  [Q] - Quit")
   table.insert(lines, "")
 
   -- Set buffer content
@@ -73,22 +72,21 @@ end
 local function setup_keymaps()
   local opts = {noremap = true, silent = true, buffer = state.buf}
 
-  -- Accept theme (1 or a)
-  vim.keymap.set('n', '1', function() M.accept_theme() end, opts)
+  -- Accept theme (A or a)
+  vim.keymap.set('n', 'A', function() M.accept_theme() end, opts)
   vim.keymap.set('n', 'a', function() M.accept_theme() end, opts)
 
-  -- Reject/Close (2 or r or q)
-  vim.keymap.set('n', '2', function() M.close() end, opts)
-  vim.keymap.set('n', 'r', function() M.close() end, opts)
+  -- Quit (Q or q)
+  vim.keymap.set('n', 'Q', function() M.close() end, opts)
   vim.keymap.set('n', 'q', function() M.close() end, opts)
 
-  -- Next theme (3 or n)
-  vim.keymap.set('n', '3', function() M.next_theme() end, opts)
+  -- Next theme (N or n)
+  vim.keymap.set('n', 'N', function() M.next_theme() end, opts)
   vim.keymap.set('n', 'n', function() M.next_theme() end, opts)
 
-  -- Previous theme (4 or b)
-  vim.keymap.set('n', '4', function() M.back_theme() end, opts)
-  vim.keymap.set('n', 'b', function() M.back_theme() end, opts)
+  -- Previous theme (P or p)
+  vim.keymap.set('n', 'P', function() M.back_theme() end, opts)
+  vim.keymap.set('n', 'p', function() M.back_theme() end, opts)
 end
 
 -- Accept current theme (save it)
@@ -111,21 +109,28 @@ function M.accept_theme()
   M.close()
 end
 
--- Generate next theme
+-- Navigate to next theme
 function M.next_theme()
+  -- If not at the end of history, just move forward
+  if state.current_index < #state.history then
+    state.current_index = state.current_index + 1
+    local theme = state.history[state.current_index]
+    writer.apply_theme(theme)
+    render_menu()
+    vim.notify("Showing theme " .. state.current_index .. "/" .. #state.history, vim.log.levels.INFO)
+    return
+  end
+
+  -- At the end of history, generate a new theme
   if not state.generator_func then
     vim.notify("No generator function set", vim.log.levels.ERROR)
     return
   end
 
-  -- Generate new theme
   local new_theme = state.generator_func()
-
-  -- Add to history
   table.insert(state.history, new_theme)
   state.current_index = #state.history
 
-  -- Apply and render
   writer.apply_theme(new_theme)
   render_menu()
 
