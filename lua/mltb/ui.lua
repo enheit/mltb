@@ -1,6 +1,7 @@
 -- UI module - bottom split menu for theme navigation
 
 local writer = require('mltb.writer')
+local names = require('mltb.names')
 
 local M = {}
 
@@ -24,42 +25,19 @@ local function render_menu()
   local lines = {}
   local current_theme = state.history[state.current_index]
 
-  -- Title
-  table.insert(lines, "╭─────────────────────────────────────────────────────────╮")
-  table.insert(lines, "│         MLTB - My Lovely Theme Builder                 │")
-  table.insert(lines, "╰─────────────────────────────────────────────────────────╯")
-  table.insert(lines, "")
-
-  -- Theme info
-  if current_theme then
-    table.insert(lines, "Theme Info:")
-    table.insert(lines, "  Type: " .. state.theme_type)
-    table.insert(lines, "  Preset: " .. state.preset)
-    table.insert(lines, "  History: " .. state.current_index .. "/" .. #state.history)
+  -- Theme name
+  if current_theme and current_theme.generated_name then
     table.insert(lines, "")
-
-    -- Color palette preview
-    table.insert(lines, "Palette:")
-    local p = current_theme.palette
-    table.insert(lines, "  BG: " .. p.bg .. "  FG: " .. p.fg)
-    table.insert(lines, "  Red: " .. p.red .. "  Orange: " .. p.orange)
-    table.insert(lines, "  Yellow: " .. p.yellow .. "  Green: " .. p.green)
-    table.insert(lines, "  Cyan: " .. p.cyan .. "  Blue: " .. p.blue)
-    table.insert(lines, "  Purple: " .. p.purple)
+    table.insert(lines, "  " .. current_theme.generated_name)
+    table.insert(lines, "")
   else
-    table.insert(lines, "No theme generated yet")
+    table.insert(lines, "")
+    table.insert(lines, "  No theme")
+    table.insert(lines, "")
   end
 
-  table.insert(lines, "")
-  table.insert(lines, "────────────────────────────────────────────────────────────")
-  table.insert(lines, "")
-
-  -- Keybindings
-  table.insert(lines, "Keybindings:")
-  table.insert(lines, "  [N] - Next")
-  table.insert(lines, "  [P] - Prev")
-  table.insert(lines, "  [A] - Accept")
-  table.insert(lines, "  [Q] - Quit")
+  -- Navigation hints
+  table.insert(lines, "  [N] Next  [P] Prev  [A] Accept  [Q] Quit")
   table.insert(lines, "")
 
   -- Set buffer content
@@ -97,8 +75,8 @@ function M.accept_theme()
     return
   end
 
-  -- Generate theme name
-  local theme_name = writer.generate_theme_name(state.theme_type, state.preset)
+  -- Use the generated name
+  local theme_name = current_theme.generated_name or "unnamed-theme"
 
   -- Save theme
   local filepath = writer.save_theme(current_theme, theme_name)
@@ -117,7 +95,6 @@ function M.next_theme()
     local theme = state.history[state.current_index]
     writer.apply_theme(theme)
     render_menu()
-    vim.notify("Showing theme " .. state.current_index .. "/" .. #state.history, vim.log.levels.INFO)
     return
   end
 
@@ -128,13 +105,15 @@ function M.next_theme()
   end
 
   local new_theme = state.generator_func()
+
+  -- Generate a unique name for this theme
+  new_theme.generated_name = names.generate_name()
+
   table.insert(state.history, new_theme)
   state.current_index = #state.history
 
   writer.apply_theme(new_theme)
   render_menu()
-
-  vim.notify("Generated new theme (" .. #state.history .. " in history)", vim.log.levels.INFO)
 end
 
 -- Go back to previous theme in history
@@ -179,6 +158,9 @@ end
 -- @param preset string: preset name
 -- @param generator_func function: function to generate new themes
 function M.open(initial_theme, theme_type, preset, generator_func)
+  -- Generate a name for the initial theme
+  initial_theme.generated_name = names.generate_name()
+
   -- Store state
   state.theme_type = theme_type
   state.preset = preset
@@ -198,8 +180,8 @@ function M.open(initial_theme, theme_type, preset, generator_func)
   vim.api.nvim_buf_set_option(state.buf, 'swapfile', false)
   vim.api.nvim_buf_set_option(state.buf, 'filetype', 'mltb')
 
-  -- Create bottom split (15 lines high)
-  vim.cmd('botright 15split')
+  -- Create bottom split (6 lines high - minimal UI)
+  vim.cmd('botright 6split')
   state.win = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_buf(state.win, state.buf)
 
