@@ -78,14 +78,14 @@ This will:
 Once a theme is generated, a minimal UI appears with:
 
 ```
-  midnight-crystal
+  midnight-crystal [1/5]
 
-  [N] Next  [P] Prev  [A] Accept  [Q] Quit
+  [N] Next  [P] Prev  [S] Save  [Q] Quit
 ```
 
 - **`N`** - Next (generate new theme or move forward in history)
 - **`P`** - Prev (go back to previous theme)
-- **`A`** - Accept (save theme with auto-generated name)
+- **`S`** - Save (save theme with auto-generated name)
 - **`Q`** - Quit (close without saving)
 
 ### Style Presets
@@ -138,10 +138,10 @@ Names are generated from ~200 carefully curated words in each category, giving y
 
 **Quick workflow:**
 1. Run `:MLTBDarkSoft`
-2. See theme name: `twilight-amber`
+2. See theme name: `twilight-amber [1/1]`
 3. Press `N` to try more variations
 4. Press `P` to go back to one you liked
-5. Press `A` to save it
+5. Press `S` to save it
 6. Use `:colorscheme twilight-amber` anytime
 
 **Or with menu:**
@@ -149,7 +149,7 @@ Names are generated from ~200 carefully curated words in each category, giving y
 2. Select "dark"
 3. Select "soft"
 4. Navigate with `N`/`P`
-5. Accept with `A`
+5. Save with `S`
 
 ## Color Theory
 

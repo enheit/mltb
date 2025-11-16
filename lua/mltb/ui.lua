@@ -38,7 +38,7 @@ local function render_menu()
   end
 
   -- Navigation hints
-  table.insert(lines, "  [N] Next  [P] Prev  [A] Accept  [Q] Quit")
+  table.insert(lines, "  [N] Next  [P] Prev  [S] Save  [Q] Quit")
   table.insert(lines, "")
 
   -- Set buffer content
@@ -51,9 +51,9 @@ end
 local function setup_keymaps()
   local opts = {noremap = true, silent = true, buffer = state.buf}
 
-  -- Accept theme (A or a)
-  vim.keymap.set('n', 'A', function() M.accept_theme() end, opts)
-  vim.keymap.set('n', 'a', function() M.accept_theme() end, opts)
+  -- Save theme (S or s)
+  vim.keymap.set('n', 'S', function() M.accept_theme() end, opts)
+  vim.keymap.set('n', 's', function() M.accept_theme() end, opts)
 
   -- Quit (Q or q)
   vim.keymap.set('n', 'Q', function() M.close() end, opts)
