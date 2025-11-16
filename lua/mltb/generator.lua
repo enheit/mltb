@@ -142,6 +142,7 @@ function M.generate_theme(palette, theme_type, preset)
   theme.highlights.Ignore = {fg = fg_muted}
   theme.highlights.Error = {fg = palette.red, bold = true}
   theme.highlights.Todo = {fg = bg, bg = palette.yellow, bold = true}
+  theme.highlights.Directory = {fg = palette.blue, bold = true}
 
   -- TreeSitter highlights
   theme.highlights["@variable"] = {fg = fg}
