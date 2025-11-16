@@ -4,12 +4,13 @@ A Neovim plugin for generating beautiful, randomized themes using Tailwind CSS c
 
 ## Features
 
-- **Interactive theme generation** with live preview
+- **Direct commands** - Jump straight to generation (`:MLTBDarkSoft`, `:MLTBLightNeon`, etc.)
+- **Auto-generated names** - Unique, memorable names like `midnight-crystal`, `forest-ember`
+- **Minimal UI** - Clean, distraction-free theme browsing
 - **7 style presets**: truly random, soft, neon, vibrant, monochrome, nature, pastel
 - **Smart color theory** algorithms (complementary, triadic, analogous, monochromatic)
-- **WCAG-compliant** contrast ratios for accessibility
-- **Session history** - navigate back through generated themes
-- **Auto-naming** - themes saved with descriptive names like `mltb-dark-soft-001.lua`
+- **Session history** - navigate back and forward through generated themes
+- **WCAG-compliant** contrast ratios for accessibility (4.5:1 minimum)
 
 ## Installation
 
@@ -37,9 +38,31 @@ use {
 
 ## Usage
 
-### Generate Themes
+### Quick Start with Direct Commands
 
-Run the command:
+Jump straight into theme generation with direct commands:
+
+```vim
+:MLTBDark           " Dark theme, truly random
+:MLTBDarkSoft       " Dark soft/harmonious theme
+:MLTBDarkNeon       " Dark high-saturation theme
+:MLTBDarkVibrant    " Dark triadic colors
+:MLTBDarkMonochrome " Dark single-hue theme
+:MLTBDarkNature     " Dark earth tones
+:MLTBDarkPastel     " Dark muted colors
+
+:MLTBLight          " Light theme, truly random
+:MLTBLightSoft      " Light soft/harmonious theme
+:MLTBLightNeon      " Light high-saturation theme
+:MLTBLightVibrant   " Light triadic colors
+:MLTBLightMonochrome" Light single-hue theme
+:MLTBLightNature    " Light earth tones
+:MLTBLightPastel    " Light muted colors
+```
+
+### Classic Menu Mode
+
+Or use the classic menu for step-by-step selection:
 
 ```vim
 :MLTBStart
@@ -49,17 +72,21 @@ This will:
 1. Prompt you to choose **dark** or **light** theme
 2. Prompt you to choose a **style preset**
 3. Generate and apply the first theme
-4. Open an interactive menu for navigation
 
-### Interactive Menu
+### Interactive Navigation
 
-Once the menu opens, you can:
+Once a theme is generated, a minimal UI appears with:
 
-- **`1` or `a`** - Accept theme (save to disk)
-- **`2` or `r`** - Reject (close without saving)
-- **`3` or `n`** - Next (generate a new random theme)
-- **`4` or `b`** - Back (go to previous theme in history)
-- **`q`** - Quit
+```
+  midnight-crystal
+
+  [N] Next  [P] Prev  [A] Accept  [Q] Quit
+```
+
+- **`N`** - Next (generate new theme or move forward in history)
+- **`P`** - Prev (go back to previous theme)
+- **`A`** - Accept (save theme with auto-generated name)
+- **`Q`** - Quit (close without saving)
 
 ### Style Presets
 
@@ -94,16 +121,35 @@ Each theme is a standalone `.lua` file that can be:
 - Shared with others
 - Selected with [MLTS](https://github.com/enheit/mlts) (My Lovely Theme Selector)
 
+## Auto-Generated Names
+
+Each theme gets a unique, memorable name like:
+- `midnight-crystal`
+- `forest-ember`
+- `azure-silk`
+- `storm-shadow`
+- `lavender-mist`
+- `crimson-stone`
+- `ocean-dream`
+
+Names are generated from ~200 carefully curated words in each category, giving you thousands of unique combinations.
+
 ## Example Workflow
 
+**Quick workflow:**
+1. Run `:MLTBDarkSoft`
+2. See theme name: `twilight-amber`
+3. Press `N` to try more variations
+4. Press `P` to go back to one you liked
+5. Press `A` to save it
+6. Use `:colorscheme twilight-amber` anytime
+
+**Or with menu:**
 1. Run `:MLTBStart`
 2. Select "dark"
 3. Select "soft"
-4. Theme is generated and applied
-5. Press `n` to try more variations
-6. Press `b` to go back to a previous one you liked
-7. Press `a` to save it
-8. Use `:colorscheme mltb-dark-soft-001` anytime
+4. Navigate with `N`/`P`
+5. Accept with `A`
 
 ## Color Theory
 
