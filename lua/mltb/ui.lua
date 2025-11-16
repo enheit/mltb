@@ -25,14 +25,15 @@ local function render_menu()
   local lines = {}
   local current_theme = state.history[state.current_index]
 
-  -- Theme name
+  -- Theme name with counter
   if current_theme and current_theme.generated_name then
+    local counter = string.format("[%d/%d]", state.current_index, #state.history)
     table.insert(lines, "")
-    table.insert(lines, "  " .. current_theme.generated_name)
+    table.insert(lines, "  " .. current_theme.generated_name .. " " .. counter)
     table.insert(lines, "")
   else
     table.insert(lines, "")
-    table.insert(lines, "  No theme")
+    table.insert(lines, "  No theme [0/0]")
     table.insert(lines, "")
   end
 
