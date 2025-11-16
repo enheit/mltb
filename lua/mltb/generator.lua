@@ -1,6 +1,7 @@
 -- Theme generator - converts color palette to full Neovim theme
 
 local presets = require('mltb.presets')
+local colors = require('mltb.colors')
 local color_theory = require('mltb.color_theory')
 
 local M = {}
@@ -8,11 +9,13 @@ local M = {}
 -- Generate a complete theme from a color palette
 -- @param palette table: color palette {bg, fg, red, orange, yellow, green, cyan, blue, purple}
 -- @param theme_type string: "dark" or "light"
+-- @param preset string: optional preset name used to generate this theme
 -- @return table: complete theme with all highlight groups
-function M.generate_theme(palette, theme_type)
+function M.generate_theme(palette, theme_type, preset)
   local theme = {
     name = "",  -- Will be set when writing
     type = theme_type,
+    preset = preset,  -- Store preset for background regeneration
     palette = palette,
     highlights = {},
   }
@@ -237,7 +240,147 @@ end
 function M.create_theme(preset, theme_type)
   local is_dark = theme_type == "dark"
   local palette = presets.generate(preset, is_dark)
-  return M.generate_theme(palette, theme_type)
+  return M.generate_theme(palette, theme_type, preset)
+end
+
+-- Regenerate theme with new background only
+-- @param current_theme table: current theme object
+-- @return table: theme with new background
+function M.regenerate_background(current_theme)
+  local theme_type = current_theme.type
+  local is_dark = theme_type == "dark"
+  local preset = current_theme.preset or "truly random"
+
+  -- Generate new background appropriate for theme type and preset
+  local new_bg
+
+  if preset == "neon" then
+    -- Neon themes: dark saturated backgrounds for dark, light vibrant for light
+    if is_dark then
+      -- Dark neon: use very dark colors from vibrant families
+      new_bg = colors.get_random_color(
+        {"slate", "gray", "zinc", "neutral", "stone", "blue", "indigo", "violet", "purple"},
+        {900, 950}
+      )
+    else
+      -- Light neon: use very light colors from vibrant families
+      new_bg = colors.get_random_color(
+        {"slate", "gray", "zinc", "neutral", "stone", "sky", "cyan", "blue"},
+        {50, 100}
+      )
+    end
+
+  elseif preset == "soft" then
+    -- Soft themes: muted, gentle backgrounds
+    if is_dark then
+      new_bg = colors.get_random_color(
+        {"slate", "gray", "zinc", "neutral", "stone", "slate", "gray"},
+        {800, 900}
+      )
+    else
+      new_bg = colors.get_random_color(
+        {"slate", "gray", "zinc", "neutral", "stone", "slate", "gray"},
+        {50, 100}
+      )
+    end
+
+  elseif preset == "pastel" then
+    -- Pastel themes: very soft, gentle backgrounds
+    if is_dark then
+      -- Dark pastel: use warmer dark neutrals
+      new_bg = colors.get_random_color(
+        {"slate", "stone", "neutral", "amber"},
+        {800, 900}
+      )
+    else
+      -- Light pastel: use very light, warm colors
+      new_bg = colors.get_random_color(
+        {"slate", "stone", "neutral", "amber", "rose", "pink", "sky"},
+        {50}
+      )
+    end
+
+  elseif preset == "nature" then
+    -- Nature themes: earth tones
+    if is_dark then
+      new_bg = colors.get_random_color(
+        {"stone", "neutral", "slate", "emerald", "teal", "green"},
+        {900, 950}
+      )
+    else
+      new_bg = colors.get_random_color(
+        {"stone", "neutral", "slate", "emerald", "teal", "green"},
+        {50, 100}
+      )
+    end
+
+  elseif preset == "vibrant" then
+    -- Vibrant themes: bold backgrounds
+    if is_dark then
+      -- Dark vibrant: use dark but colorful backgrounds
+      new_bg = colors.get_random_color(
+        {"slate", "gray", "blue", "indigo", "purple", "violet"},
+        {900, 950}
+      )
+    else
+      -- Light vibrant: use light but slightly colored backgrounds
+      new_bg = colors.get_random_color(
+        {"slate", "sky", "blue", "cyan", "violet", "fuchsia"},
+        {50, 100}
+      )
+    end
+
+  elseif preset == "monochrome" then
+    -- Monochrome themes: same neutral family
+    if is_dark then
+      new_bg = colors.get_random_color(
+        {"slate", "gray", "zinc", "neutral", "stone"},
+        {800, 900, 950}
+      )
+    else
+      new_bg = colors.get_random_color(
+        {"slate", "gray", "zinc", "neutral", "stone"},
+        {50, 100}
+      )
+    end
+
+  else
+    -- Truly random or unknown preset: random backgrounds from any color
+    if is_dark then
+      -- Dark: use darker shades from any color family
+      local all_families = {"slate", "gray", "zinc", "neutral", "stone", "red", "orange",
+                           "amber", "yellow", "lime", "green", "emerald", "teal", "cyan",
+                           "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose"}
+      new_bg = colors.get_random_color(all_families, {800, 900, 950})
+    else
+      -- Light: use lighter shades from any color family
+      local all_families = {"slate", "gray", "zinc", "neutral", "stone", "red", "orange",
+                           "amber", "yellow", "lime", "green", "emerald", "teal", "cyan",
+                           "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose"}
+      new_bg = colors.get_random_color(all_families, {50, 100})
+    end
+  end
+
+  -- Create new palette with updated background
+  local new_palette = {
+    bg = new_bg,
+    fg = current_theme.palette.fg,
+    red = current_theme.palette.red,
+    orange = current_theme.palette.orange,
+    yellow = current_theme.palette.yellow,
+    green = current_theme.palette.green,
+    cyan = current_theme.palette.cyan,
+    blue = current_theme.palette.blue,
+    purple = current_theme.palette.purple,
+  }
+
+  -- Regenerate theme with new palette, preserving preset
+  local new_theme = M.generate_theme(new_palette, theme_type, preset)
+
+  -- Preserve the generated name
+  new_theme.generated_name = current_theme.generated_name
+
+  return new_theme
 end
 
 return M

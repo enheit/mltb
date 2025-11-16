@@ -4,6 +4,7 @@
 local generator = require('mltb.generator')
 local presets = require('mltb.presets')
 local ui = require('mltb.ui')
+local selector = require('mltb.selector')
 
 local M = {}
 
@@ -38,37 +39,35 @@ function M.start_with(theme_type, preset)
   ui.open(initial_theme, theme_type, preset, generator_func)
 end
 
+-- Capitalize first letter of each word
+local function capitalize(str)
+  return str:gsub("(%a)([%w_']*)", function(first, rest)
+    return first:upper() .. rest
+  end)
+end
+
 -- Start the theme generation process with menus (backward compatibility)
 function M.start()
-  -- Step 1: Ask for theme type (dark/light)
-  vim.ui.select(
-    {'dark', 'light'},
-    {
-      prompt = 'Select theme type:',
-    },
-    function(theme_type)
-      if not theme_type then
-        vim.notify("Theme generation cancelled", vim.log.levels.INFO)
-        return
-      end
+  -- Build list of all theme options
+  local items = {}
+  local theme_types = {'dark', 'light'}
 
-      -- Step 2: Ask for style preset
-      vim.ui.select(
-        presets.presets,
-        {
-          prompt = 'Select style preset:',
-        },
-        function(preset)
-          if not preset then
-            vim.notify("Theme generation cancelled", vim.log.levels.INFO)
-            return
-          end
-
-          M.start_with(theme_type, preset)
-        end
-      )
+  for _, theme_type in ipairs(theme_types) do
+    for _, preset in ipairs(presets.presets) do
+      local label = capitalize(theme_type) .. " " .. capitalize(preset)
+      table.insert(items, {
+        label = label,
+        value = {type = theme_type, preset = preset}
+      })
     end
-  )
+  end
+
+  -- Show selector
+  selector.open(items, function(selection)
+    if selection then
+      M.start_with(selection.type, selection.preset)
+    end
+  end)
 end
 
 -- Create user commands

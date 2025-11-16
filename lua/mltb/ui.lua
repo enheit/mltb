@@ -2,6 +2,7 @@
 
 local writer = require('mltb.writer')
 local names = require('mltb.names')
+local generator = require('mltb.generator')
 
 local M = {}
 
@@ -38,7 +39,7 @@ local function render_menu()
   end
 
   -- Navigation hints
-  table.insert(lines, "  [N] Next  [P] Prev  [S] Save  [Q] Quit")
+  table.insert(lines, "  [N] Next  [P] Prev  [B] Background  [S] Save  [Q] Quit")
   table.insert(lines, "")
 
   -- Set buffer content
@@ -66,6 +67,10 @@ local function setup_keymaps()
   -- Previous theme (P or p)
   vim.keymap.set('n', 'P', function() M.back_theme() end, opts)
   vim.keymap.set('n', 'p', function() M.back_theme() end, opts)
+
+  -- Change background (B or b)
+  vim.keymap.set('n', 'B', function() M.change_background() end, opts)
+  vim.keymap.set('n', 'b', function() M.change_background() end, opts)
 end
 
 -- Accept current theme (save it)
@@ -133,6 +138,31 @@ function M.back_theme()
   render_menu()
 
   vim.notify("Showing theme " .. state.current_index .. "/" .. #state.history, vim.log.levels.INFO)
+end
+
+-- Change background of current theme
+function M.change_background()
+  local current_theme = state.history[state.current_index]
+  if not current_theme then
+    vim.notify("No theme to modify", vim.log.levels.WARN)
+    return
+  end
+
+  -- Regenerate background using generator
+  local new_theme = generator.regenerate_background(current_theme)
+
+  -- Generate a new name for this variation
+  new_theme.generated_name = names.generate_name()
+
+  -- Add to history
+  table.insert(state.history, new_theme)
+  state.current_index = #state.history
+
+  -- Apply the new theme
+  writer.apply_theme(new_theme)
+  render_menu()
+
+  vim.notify("Background changed", vim.log.levels.INFO)
 end
 
 -- Close the UI
