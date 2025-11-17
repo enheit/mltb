@@ -2,6 +2,8 @@
 
 A Neovim plugin for generating beautiful, randomized themes using Tailwind CSS colors and color theory.
 
+[![asciicast](https://asciinema.org/a/YOpjDmFvSaM7qupV03jRpzGEh.svg)](https://asciinema.org/a/YOpjDmFvSaM7qupV03jRpzGEh)
+
 ## Features
 
 - **Direct commands** - Jump straight to generation (`:MLTBDarkSoft`, `:MLTBLightNeon`, etc.)
