@@ -6,6 +6,37 @@ local color_theory = require('mltb.color_theory')
 
 local M = {}
 
+local semantic_candidates = {
+  red = {
+    dark = {"#f87171", "#ef4444", "#fb7185", "#f43f5e"},
+    light = {"#b91c1c", "#dc2626", "#be123c", "#9f1239"},
+  },
+  orange = {
+    dark = {"#fb923c", "#f97316", "#f59e0b", "#fdba74"},
+    light = {"#c2410c", "#ea580c", "#b45309", "#9a3412"},
+  },
+}
+
+local function pick_best_contrast(candidates, bg)
+  local best_color = candidates[1]
+  local best_ratio = -1
+
+  for _, candidate in ipairs(candidates) do
+    local ratio = color_theory.get_contrast_ratio(candidate, bg)
+    if ratio > best_ratio then
+      best_ratio = ratio
+      best_color = candidate
+    end
+  end
+
+  return best_color
+end
+
+local function semantic_color(name, bg, theme_type)
+  local mode = theme_type == "dark" and "dark" or "light"
+  return pick_best_contrast(semantic_candidates[name][mode], bg)
+end
+
 -- Generate a complete theme from a color palette
 -- @param palette table: color palette {bg, fg, red, orange, yellow, green, cyan, blue, purple}
 -- @param theme_type string: "dark" or "light"
@@ -25,16 +56,24 @@ function M.generate_theme(palette, theme_type, preset)
 
   -- Derive additional UI colors
   local bg_lighter, bg_darker, fg_muted
+  local visual_bg, cursorline_bg
 
   if theme_type == "dark" then
     bg_lighter = color_theory.adjust_lightness(bg, 5)
     bg_darker = color_theory.adjust_lightness(bg, -3)
     fg_muted = color_theory.adjust_lightness(fg, -30)
+    visual_bg = color_theory.adjust_lightness(bg, 14)
+    cursorline_bg = color_theory.adjust_lightness(bg, 9)
   else
-    bg_lighter = color_theory.adjust_lightness(bg, 3)
+    bg_lighter = color_theory.adjust_lightness(bg, -3)
     bg_darker = color_theory.adjust_lightness(bg, -5)
     fg_muted = color_theory.adjust_lightness(fg, 30)
+    visual_bg = color_theory.adjust_lightness(bg, -10)
+    cursorline_bg = color_theory.adjust_lightness(bg, -6)
   end
+
+  local semantic_red = semantic_color("red", bg, theme_type)
+  local semantic_orange = semantic_color("orange", bg, theme_type)
 
   -- Core UI highlights
   theme.highlights.Normal = {fg = fg, bg = bg}
@@ -43,17 +82,17 @@ function M.generate_theme(palette, theme_type, preset)
 
   -- Cursor
   theme.highlights.Cursor = {fg = bg, bg = fg}
-  theme.highlights.CursorLine = {bg = bg_lighter}
+  theme.highlights.CursorLine = {bg = cursorline_bg}
   theme.highlights.CursorLineNr = {fg = palette.yellow, bold = true}
-  theme.highlights.CursorColumn = {bg = bg_lighter}
+  theme.highlights.CursorColumn = {bg = cursorline_bg}
 
   -- Line numbers
   theme.highlights.LineNr = {fg = fg_muted}
   theme.highlights.SignColumn = {fg = fg_muted, bg = bg}
 
   -- Visual selection
-  theme.highlights.Visual = {bg = bg_lighter}
-  theme.highlights.VisualNOS = {bg = bg_lighter}
+  theme.highlights.Visual = {bg = visual_bg}
+  theme.highlights.VisualNOS = {bg = visual_bg}
 
   -- Search
   theme.highlights.Search = {fg = bg, bg = palette.yellow}
@@ -75,8 +114,8 @@ function M.generate_theme(palette, theme_type, preset)
   theme.highlights.MsgSeparator = {fg = palette.blue, bg = bg}
   theme.highlights.MoreMsg = {fg = palette.green}
   theme.highlights.Question = {fg = palette.blue}
-  theme.highlights.WarningMsg = {fg = palette.orange}
-  theme.highlights.ErrorMsg = {fg = palette.red, bold = true}
+  theme.highlights.WarningMsg = {fg = semantic_orange}
+  theme.highlights.ErrorMsg = {fg = semantic_red, bold = true}
 
   -- Popups/menus
   theme.highlights.Pmenu = {fg = fg, bg = bg_lighter}
@@ -87,7 +126,7 @@ function M.generate_theme(palette, theme_type, preset)
   -- Diffs
   theme.highlights.DiffAdd = {fg = palette.green, bg = bg}
   theme.highlights.DiffChange = {fg = palette.yellow, bg = bg}
-  theme.highlights.DiffDelete = {fg = palette.red, bg = bg}
+  theme.highlights.DiffDelete = {fg = semantic_red, bg = bg}
   theme.highlights.DiffText = {fg = palette.cyan, bg = bg}
 
   -- Folds
@@ -95,7 +134,7 @@ function M.generate_theme(palette, theme_type, preset)
   theme.highlights.FoldColumn = {fg = fg_muted, bg = bg}
 
   -- Spelling
-  theme.highlights.SpellBad = {fg = palette.red, underline = true, sp = palette.red}
+  theme.highlights.SpellBad = {fg = semantic_red, underline = true, sp = semantic_red}
   theme.highlights.SpellCap = {fg = palette.yellow, underline = true, sp = palette.yellow}
   theme.highlights.SpellLocal = {fg = palette.cyan, underline = true, sp = palette.cyan}
   theme.highlights.SpellRare = {fg = palette.purple, underline = true, sp = palette.purple}
@@ -140,7 +179,7 @@ function M.generate_theme(palette, theme_type, preset)
 
   theme.highlights.Underlined = {fg = palette.blue, underline = true}
   theme.highlights.Ignore = {fg = fg_muted}
-  theme.highlights.Error = {fg = palette.red, bold = true}
+  theme.highlights.Error = {fg = semantic_red, bold = true}
   theme.highlights.Todo = {fg = bg, bg = palette.yellow, bold = true}
   theme.highlights.Directory = {fg = palette.blue, bold = true}
 
@@ -216,20 +255,20 @@ function M.generate_theme(palette, theme_type, preset)
   theme.highlights["@lsp.type.variable"] = {fg = fg}
 
   -- Diagnostics
-  theme.highlights.DiagnosticError = {fg = palette.red}
-  theme.highlights.DiagnosticWarn = {fg = palette.yellow}
+  theme.highlights.DiagnosticError = {fg = semantic_red}
+  theme.highlights.DiagnosticWarn = {fg = semantic_orange}
   theme.highlights.DiagnosticInfo = {fg = palette.blue}
   theme.highlights.DiagnosticHint = {fg = palette.cyan}
 
-  theme.highlights.DiagnosticUnderlineError = {undercurl = true, sp = palette.red}
-  theme.highlights.DiagnosticUnderlineWarn = {undercurl = true, sp = palette.yellow}
+  theme.highlights.DiagnosticUnderlineError = {undercurl = true, sp = semantic_red}
+  theme.highlights.DiagnosticUnderlineWarn = {undercurl = true, sp = semantic_orange}
   theme.highlights.DiagnosticUnderlineInfo = {undercurl = true, sp = palette.blue}
   theme.highlights.DiagnosticUnderlineHint = {undercurl = true, sp = palette.cyan}
 
   -- Git signs
   theme.highlights.GitSignsAdd = {fg = palette.green}
   theme.highlights.GitSignsChange = {fg = palette.yellow}
-  theme.highlights.GitSignsDelete = {fg = palette.red}
+  theme.highlights.GitSignsDelete = {fg = semantic_red}
 
   return theme
 end
